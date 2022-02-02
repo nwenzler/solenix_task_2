@@ -30,8 +30,7 @@ public class Main {
             }catch (IOException ioe) {
                 System.out.println("todo");
             }
-            JSONArray jsonArray = new JSONArray(content);
-            return jsonArray;
+            return new JSONArray(content);
         }
     }
 
@@ -55,7 +54,6 @@ public class Main {
             }
         }
     }
-
 
     public static void main(String[] args) {
         try {
