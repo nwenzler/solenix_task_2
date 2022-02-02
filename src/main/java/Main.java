@@ -2,6 +2,8 @@ import org.json.*;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 
@@ -34,29 +36,41 @@ public class Main {
     }
 
     /*
-     * Extracts necessary infos from JSONArray (issue names and character count of first comment)
+     * Extracts necessary infos from JSONArray (issue names and character count of first comment).
      * Note: The character count of a first comment includes special characters used for markdown formatting.
      * Note: GitHub counts pull requests as issues, this method does not.
      */
-    public static void parseIssues(JSONArray jsonArray) throws IOException {
+    public static Map<String, String> parseIssues(JSONArray jsonArray) throws IOException {
 
         String issueTitle;
         String issueBody;
+        Map<String, String> issuesOutput = new HashMap<>();
 
         for (int i = 0; i < jsonArray.length(); i++) {
             // Filter out pull requests (GitHub Issues API counts PRs as issues)
             if (!jsonArray.getJSONObject(i).has("pull_request")) {
                 issueTitle = (String) jsonArray.getJSONObject(i).get("title");
                 issueBody = (String) jsonArray.getJSONObject(i).get("body");
-                System.out.println(issueTitle + " " + issueBody.length() + " characters");
+                issuesOutput.put(issueTitle, String.valueOf(issueBody.length()));
             }
+        }
+        return issuesOutput;
+    }
+
+    /*
+     * Prints the necessary infos (issue names and character count of first comment).
+     * Note: the formatting tries to follow the task specification as closely as possible.
+     */
+    public static void printIssues(Map<String, String> issuesOutput){
+        for (Map.Entry<String, String> entry : issuesOutput.entrySet()) {
+            System.out.println(entry.getKey() + "\t\t" + entry.getValue() + " characters");
         }
     }
 
     public static void main(String[] args) {
         try {
             JSONArray jsonArray = getJSONArray(issuesAPI);
-            parseIssues(jsonArray);
+            printIssues(parseIssues(jsonArray));
         } catch (IOException ioe) {
             System.out.println(ioe.getMessage());
         }
