@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    private final static String issuesAPI = "https://api.github.com/repos/planetlabs/staccato/issues";
+    final static String issuesAPI = "https://api.github.com/repos/planetlabs/staccato/issues";
 
     /*
      * Sends a GET request to the specified URL and parses response into a JSONArray.
@@ -17,21 +17,20 @@ public class Main {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         conn.connect();
-        int responsecode = conn.getResponseCode();
+        int responseCode = conn.getResponseCode();
 
-        if (responsecode != 200) {
-            throw new RuntimeException("HttpResponseCode: " + responsecode);
-        }else{
-            String content = "";
-            try (Scanner scanner = new Scanner(url.openStream())) {
-                while (scanner.hasNext()) {
-                    content += scanner.nextLine();
-                }
-            }catch (IOException ioe) {
-                System.out.println("todo");
-            }
-            return new JSONArray(content);
+        if (responseCode != 200) {
+            throw new RuntimeException("HttpResponseCode: " + responseCode);
         }
+
+        StringBuilder content = new StringBuilder();
+        Scanner scanner = new Scanner(url.openStream());
+        while (scanner.hasNext()) {
+            content.append(scanner.nextLine());
+        }
+        scanner.close();
+
+        return new JSONArray(content.toString());
     }
 
     /*
@@ -39,15 +38,14 @@ public class Main {
      * Note: The character count of a first comment includes special characters used for markdown formatting.
      * Note: GitHub counts pull requests as issues, this method does not.
      */
-    public static void parseIssues(String issuesAPI) throws IOException {
+    public static void parseIssues(JSONArray jsonArray) throws IOException {
 
-        JSONArray jsonArray = getJSONArray(issuesAPI);
         String issueTitle;
         String issueBody;
 
         for (int i = 0; i < jsonArray.length(); i++) {
             // Filter out pull requests (GitHub Issues API counts PRs as issues)
-            if (!jsonArray.getJSONObject(i).has("pull_request")){
+            if (!jsonArray.getJSONObject(i).has("pull_request")) {
                 issueTitle = (String) jsonArray.getJSONObject(i).get("title");
                 issueBody = (String) jsonArray.getJSONObject(i).get("body");
                 System.out.println(issueTitle + " " + issueBody.length() + " characters");
@@ -57,9 +55,10 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            parseIssues(issuesAPI);
-        }catch(IOException ioe){
-            System.out.println("Error connecting to the GitHub Issues API.");
+            JSONArray jsonArray = getJSONArray(issuesAPI);
+            parseIssues(jsonArray);
+        } catch (IOException ioe) {
+            System.out.println(ioe.getMessage());
         }
     }
 }
