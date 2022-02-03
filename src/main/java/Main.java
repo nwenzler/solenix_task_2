@@ -61,7 +61,7 @@ public class Main {
      * Prints the necessary infos (issue names and character count of first comment).
      * Note: the formatting tries to follow the task specification as closely as possible.
      */
-    public static void printIssues(Map<String, String> issuesOutput){
+    public static void printIssues(Map<String, String> issuesOutput) {
         for (Map.Entry<String, String> entry : issuesOutput.entrySet()) {
             System.out.println(entry.getKey() + "\t\t" + entry.getValue() + " characters");
         }
