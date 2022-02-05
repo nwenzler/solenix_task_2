@@ -26,11 +26,13 @@ public class Main {
         }
 
         StringBuilder content = new StringBuilder();
-        Scanner scanner = new Scanner(url.openStream());
-        while (scanner.hasNext()) {
-            content.append(scanner.nextLine());
+
+        // Try with resource to automatically close the scanner
+        try (Scanner scanner = new Scanner(url.openStream())) {
+            while (scanner.hasNext()) {
+                content.append(scanner.nextLine());
+            }
         }
-        scanner.close();
 
         return new JSONArray(content.toString());
     }
@@ -46,11 +48,14 @@ public class Main {
         String issueBody;
         Map<String, String> issuesOutput = new HashMap<>();
 
-        for (int i = 0; i < jsonArray.length(); i++) {
+        int jsonArrayLength = jsonArray.length();
+        JSONObject currentJSONObject;
+        for (int i = 0; i < jsonArrayLength; i++) {
+            currentJSONObject = jsonArray.getJSONObject(i);
             // Filter out pull requests (GitHub Issues API counts PRs as issues)
-            if (!jsonArray.getJSONObject(i).has("pull_request")) {
-                issueTitle = (String) jsonArray.getJSONObject(i).get("title");
-                issueBody = (String) jsonArray.getJSONObject(i).get("body");
+            if (!currentJSONObject.has("pull_request")) {
+                issueTitle = (String) currentJSONObject.get("title");
+                issueBody = (String) currentJSONObject.get("body");
                 issuesOutput.put(issueTitle, String.valueOf(issueBody.length()));
             }
         }
